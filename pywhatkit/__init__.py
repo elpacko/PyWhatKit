@@ -1,10 +1,8 @@
-""" Version 5.2
-# Status: Stable
-# Documentation: https://github.com/Ankit404butfound/PyWhatKit/wiki
-# Report Bugs and Feature Requests here: https://github.com/Ankit404butfound/PyWhatKit/issues
-# For further Information, Join our Discord: https://discord.gg/62Yf5mushu
+""" Version 5.4
+# Status: Development
+
 """
-__VERSION__ = "Version 5.3 (Stable)"
+__VERSION__ = "Version 5.4 (Development)"
 
 from platform import system
 

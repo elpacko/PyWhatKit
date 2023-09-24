@@ -11,11 +11,79 @@ import pyperclip
 import keyboard
 from pywhatkit.core import core, exceptions, log
 from typing import Union
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
+import time
+import logging
 
 pg.FAILSAFE = False
 
 core.check_connection()
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S')
 
+def __init__(self):
+    session_driver = None
+
+def get_element_by_xpath(driver, xpath):
+    try:
+        return driver.find_element(By.XPATH, xpath)
+    except:
+        return None
+
+def initialize_driver(user_data_dir: str, profile_directory: str):
+    logging.info('Initializing driver')
+    chrome_options = webdriver.ChromeOptions()
+    # chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument("--remote-debugging-port=9222")  # this
+
+    # chrome_options.add_argument('--disable-dev-shm-usage')
+    chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
+    chrome_options.add_argument(f"--profile-directory={profile_directory}")
+    driver = webdriver.Chrome(options=chrome_options)
+    driver.get('https://web.whatsapp.com/')
+    time.sleep(15)
+    try:
+        new_chat_span_xpath = "//span[@data-icon='new-chat']"
+        if not driver.find_elements(By.XPATH, new_chat_span_xpath):
+            logging.warning('Not logged in')
+            logging.info("Waiting for QR code scan or until timeout in 50 seconds")
+            WebDriverWait(driver,50).until(lambda driver: driver.find_element(By.XPATH, "//span[@data-icon='new-chat']"))
+
+    except Exception as e:
+        logging.ERROR(f"Exception occured {e}")
+        driver.quit()
+        return None
+    return driver
+
+def sendwhatmsg_using_selenium(session_driver: webdriver, phone_no: str, message: str):
+    try:
+        
+        new_chat_element = get_element_by_xpath(session_driver, "//span[@data-icon='new-chat']")
+        new_chat_element.click()
+        time.sleep(2)
+        number_textbox = get_element_by_xpath(session_driver, "//div[@title='Search input textbox']")
+        number_textbox.click()
+        number_textbox.send_keys(phone_no)
+        time.sleep(3)
+        contact_element = get_element_by_xpath(session_driver, "//div[@class='_3YS_f _2A1R8']/div[2]")
+        contact_element.click()
+        time.sleep(2)
+        inp_xpath = '//div[@title="Type a message"]'
+        input_box = session_driver.find_element(By.XPATH,inp_xpath)
+        time.sleep(2)
+        input_box.send_keys(message + Keys.ENTER)
+        time.sleep(2)
+    except Exception as e:
+        logging.ERROR(f"Exception occured {e}")
+    
 
 def sendwhatmsg_instantly(
         phone_no: str,
